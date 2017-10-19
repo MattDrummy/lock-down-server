@@ -25,9 +25,10 @@ func main()  {
   gin.DefaultWriter = io.MultiWriter(f)
 
   port := os.Getenv("PORT")
+  client := os.Getenv("CLIENT_URL")
   router := gin.Default()
   router.Use(cors.New(cors.Config{
-    AllowOrigins: []string{os.Getenv("SITE_URL")},
+    AllowOrigins: []string{client},
     AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
     AllowHeaders: []string{"Origin"},
     ExposeHeaders: []string{"Content-Length"},
@@ -43,6 +44,7 @@ func main()  {
   router.GET("/socket.io/", gin.WrapH(socket))
   router.POST("/socket.io/", gin.WrapH(socket))
   log.Println("server ready on port: " + port)
-  router.Run(":" + os.Getenv("PORT"))
+  log.Println("CORS allowed on " + client)
+  router.Run(":" + port)
 
 }
