@@ -3,7 +3,8 @@ package main
 import (
   "io"
   "os"
-  "fmt"
+  "log"
+
   "github.com/gin-gonic/gin"
   "github.com/joho/godotenv"
   "github.com/gin-contrib/cors"
@@ -14,12 +15,12 @@ import (
 func main()  {
   err := godotenv.Load()
   if err != nil {
-    fmt.Println(err)
+    log.Println(err)
   }
   gin.DisableConsoleColor()
   f, err := os.Create("gin.log")
   if err != nil {
-    fmt.Println(err)
+    log.Println(err)
   }
   gin.DefaultWriter = io.MultiWriter(f)
 
@@ -34,13 +35,14 @@ func main()  {
   }))
   socket, err := socketio.NewServer(nil)
   if err != nil {
-    fmt.Println(err)
+    log.Println(err)
   }
   socket.On("connection", socketConnectionHandler)
   socket.On("error", socketErorrHandler)
+  router.GET("/", indexHandler)
   router.GET("/socket.io/", gin.WrapH(socket))
   router.POST("/socket.io/", gin.WrapH(socket))
-  fmt.Println("server ready on port: " + port)
+  log.Println("server ready on port: " + port)
   router.Run(":" + os.Getenv("PORT"))
 
 }
