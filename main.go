@@ -1,7 +1,6 @@
 package main
 
 import (
-  "io"
   "os"
   "log"
 
@@ -17,13 +16,6 @@ func main()  {
   if err != nil {
     log.Println(err)
   }
-  gin.DisableConsoleColor()
-  f, err := os.Create("gin.log")
-  if err != nil {
-    log.Println(err)
-  }
-  gin.DefaultWriter = io.MultiWriter(f)
-
   port := os.Getenv("PORT")
   client := os.Getenv("CLIENT_URL")
   router := gin.Default()
@@ -41,6 +33,7 @@ func main()  {
   socket.On("connection", socketConnectionHandler)
   socket.On("error", socketErorrHandler)
   router.GET("/", indexHandler)
+  router.GET("api/v1/users", getUsers)
   router.GET("/socket.io/", gin.WrapH(socket))
   router.POST("/socket.io/", gin.WrapH(socket))
   log.Println("server ready on port: " + port)
