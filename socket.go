@@ -11,7 +11,7 @@ func socketConnectionHandler(s socketio.Socket)  {
   s.On("open", func (con [2]string)  {
     user := con[0]
     room := con[1]
-    s.Join(user[1])
+    s.Join(con[1])
     log.Println(user + " connected to " + room)
     s.BroadcastTo(room, "message", user + " connected to " + room)
     s.Emit("message", "You have connected to " + room)
