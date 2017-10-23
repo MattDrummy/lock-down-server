@@ -4,4 +4,4 @@ A go server to be used with the lockDown() client, running a mongo database with
 
 ERD
 
-![ERD]('images/capstone-erd.jpg')
+![ERD](/images/erd.jpg)
