@@ -18,6 +18,16 @@ type User struct {
   Timestamp int32
 }
 
+type Game struct {
+  ID bson.ObjectId `json:"id" bson:"_id,omitempty"`
+  owner string
+  room string
+  operator string
+  operative string
+  password string
+  Timestamp int32
+}
+
 func getUsers(c *gin.Context)  {
   log.Println("GET at api/v1/users")
   mongo := os.Getenv("MONGODB_URI")
@@ -31,6 +41,22 @@ func getUsers(c *gin.Context)  {
   users.Find(nil).All(&data)
   c.JSON(http.StatusOK, gin.H{
     "users": data,
+  })
+}
+
+func getGames(c *gin.Context)  {
+  log.Println("GET at api/v1/games")
+  mongo := os.Getenv("MONGODB_URI")
+  db := os.Getenv("DATABASE_NAME")
+  session, err := mgo.Dial(mongo)
+  if err != nil {
+    log.Println(err)
+  }
+  games := session.DB(db).C("game")
+  var data []Game
+  games.Find(nil).All(&data)
+  c.JSON(http.StatusOK, gin.H{
+    "games": data,
   })
 }
 
