@@ -23,6 +23,12 @@ func socketConnectionHandler(s socketio.Socket)  {
     s.Emit("message", message)
     s.BroadcastTo(room, "message", message)
   })
+  s.On("close", func (con [2]string)  {
+    user := con[0]
+    room := con[1]
+    log.Println(user + " has left " + room)
+    s.BroadcastTo(room, "close", user + " has left " + room)
+  })
   s.On("disconnection", func(){
     log.Println("a user has disconnected")
   })
