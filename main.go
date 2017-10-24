@@ -34,10 +34,12 @@ func main()  {
   socket.On("error", socketErorrHandler)
   router.GET("/", indexHandler)
   router.GET("api/v1/users", getUsers)
+  router.GET("api/v1/games", getGames)
+  router.POST("api/v1/users", postUser)
+  router.POST("api/v1/games", postGame)
   router.GET("/socket.io/", gin.WrapH(socket))
   router.POST("/socket.io/", gin.WrapH(socket))
   log.Println("server ready on port: " + port)
   log.Println("CORS allowed on " + client)
   router.Run(":" + port)
-
 }
