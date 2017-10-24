@@ -16,6 +16,7 @@ type User struct {
   ID bson.ObjectId `json:"id" bson:"_id,omitempty"`
   Username string `json:"username"`
   Email string `json:"email"`
+  Password string `json:"password"`
   Timestamp int32 `json:"timestamp"`
 }
 
@@ -27,6 +28,11 @@ type Game struct {
   Operative string `json:"operative"`
   Password string `json:"password"`
   Timestamp int32 `json:"timestamp"`
+  OperatorLocation string `json:"operatorLocation"`
+  OperatorPassword string `json:"operatorPassword"`
+  OperatorPort int32 `json:"operatorPort"`
+  OperativePort int32 `json:"operativePort"`
+  OperativeLocation string `json:"operativeLocation"`
 }
 
 func getUsers(c *gin.Context)  {
@@ -65,6 +71,7 @@ func postUser(c *gin.Context)  {
   log.Println("POST at api/v1/users")
   username := c.PostForm("username")
   email := c.PostForm("email")
+  password := c.PostForm("password")
   timestamp := int32(time.Now().Unix())
   log.Println("GET at api/v1/users")
   mongo := os.Getenv("MONGODB_URI")
@@ -78,6 +85,7 @@ func postUser(c *gin.Context)  {
     Username: username,
     Email: email,
     Timestamp: timestamp,
+    Password: password,
   })
   if err != nil {
     log.Println(err)
@@ -97,6 +105,11 @@ func postGame(c *gin.Context)  {
   operative := c.PostForm("operative")
   password := c.PostForm("password")
   timestamp := int32(time.Now().Unix())
+  operatorLocation := c.PostForm("operatorLocation")
+  operatorPassword := c.PostForm("operatorPassword")
+  operatorPort := c.PostForm("operatorPort")
+  operativePort := c.PostForm("operativePort")
+  operativeLocation := c.PostForm("operativeLocation")
   log.Println("GET at api/v1/users")
   mongo := os.Getenv("MONGODB_URI")
   db := os.Getenv("DATABASE_NAME")
@@ -112,6 +125,11 @@ func postGame(c *gin.Context)  {
     Operative: operative,
     Password: password,
     Timestamp: timestamp,
+    OperatorLocation: operatorLocation,
+    OperatorPassword: operatorPassword,
+    OperatorPort: operatorPort,
+    OperativePort: operativePort,
+    OperativeLocation: operativeLocation,
   })
   if err != nil {
     log.Println(err)
@@ -124,6 +142,13 @@ func postGame(c *gin.Context)  {
 
 }
 
+func deleteUser()  {
+
+}
+
+func deleteGame(){
+
+}
 func indexHandler(c *gin.Context)  {
   c.JSON(http.StatusOK, gin.H{
     "status": "success",
