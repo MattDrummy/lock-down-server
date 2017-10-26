@@ -30,19 +30,43 @@ func main()  {
   if err != nil {
     log.Println(err)
   }
+
+  // INDEX ROUTE
+
+  router.GET("/", indexHandler)
+
+  // EMAIL
+
+  router.POST("/email", emailHandler)
+  
+  // JWT
+
+  router.POST("/signJWT", signJWT)
+  router.POST("/verifyJWT", verifyJWT)
+
+  // SOCKETS
+
   socket.On("connection", socketConnectionHandler)
   socket.On("error", socketErorrHandler)
-  router.GET("/", indexHandler)
-  router.GET("api/v1/users", getUsers)
-  router.GET("api/v1/games", getGames)
-  router.POST("api/v1/users", postUser)
-  router.POST("api/v1/games", postGame)
-  router.DELETE("api/v1/users/:time", deleteUser)
-  router.DELETE("api/v1/games/:time", deleteGame)
-  router.PUT("api/v1/users/:time", patchUser)
-  router.PUT("api/v1/games/:time", patchGame)
   router.GET("/socket.io/", gin.WrapH(socket))
   router.POST("/socket.io/", gin.WrapH(socket))
+
+  // USER DB
+
+  router.GET("api/v1/users", getUsers)
+  router.POST("api/v1/users", postUser)
+  router.DELETE("api/v1/users/:time", deleteUser)
+  router.PUT("api/v1/users/:time", patchUser)
+
+  // GAME DB
+
+  router.GET("api/v1/games", getGames)
+  router.POST("api/v1/games", postGame)
+  router.DELETE("api/v1/games/:time", deleteGame)
+  router.PUT("api/v1/games/:time", patchGame)
+
+  // LOG AND RUN
+
   log.Println("server ready on port: " + port)
   log.Println("CORS allowed on " + client)
   router.Run(":" + port)

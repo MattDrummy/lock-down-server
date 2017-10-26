@@ -6,10 +6,13 @@ import (
   "os"
   "time"
   "strconv"
+  "fmt"
 
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
   "github.com/gin-gonic/gin"
+  "github.com/dgrijalva/jwt-go"
+  "github.com/SlyMarbo/gmail"
 )
 
 type User struct {
@@ -34,6 +37,77 @@ type Game struct {
   OperativePort string `json:"operativePort"`
   OperativeLocation string `json:"operativeLocation"`
 }
+
+// EMAIL
+
+func emailHandler(c *gin.Context)  {
+  email := gmail.Compose(c.PostForm("subject"), c.PostForm("body"))
+  email.From = os.Getenv("EMAIL_SENDER")
+  email.Password = os.Getenv("EMAIL_PASSWORD")
+  email.ContentType = "text/html; charset=utf-8"
+  email.AddRecipient(c.PostForm("recipient"))
+  if err := email.Send(); err != nil {
+    c.JSON(http.StatusOK, gin.H{
+      "error": err,
+    })
+  } else {
+    c.JSON(http.StatusOK, gin.H{
+      "message": "sent",
+    })
+  }
+}
+
+// JWT
+
+func createToken(claims *jwt.MapClaims) string {
+  token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+  secretKey := os.Getenv("HMAC_SECRET_KEY")
+  hmacSampleSecret := []byte(secretKey)
+  tokenString, err := token.SignedString(hmacSampleSecret)
+  if err != nil {
+    log.Println(err)
+  }
+  return tokenString
+
+}
+
+func signJWT(c *gin.Context)  {
+  claims := &jwt.MapClaims{
+    "username": c.PostForm("username"),
+    "email": c.PostForm("email"),
+    "password": c.PostForm("password"),
+  }
+  tokenString := createToken(claims)
+  c.JSON(http.StatusOK, gin.H{
+    "tokenString": tokenString,
+  })
+}
+
+func verifyJWT(c *gin.Context) {
+  tokenString := c.PostForm("tokenString")
+  secretKey := os.Getenv("HMAC_SECRET_KEY")
+  hmacSampleSecret := []byte(secretKey)
+
+  token, err := jwt.Parse(tokenString, func(token *jwt.Token)(interface{}, error){
+    if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+      return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+    }
+    return hmacSampleSecret, nil
+  })
+
+
+  if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+    c.JSON(http.StatusOK, gin.H{
+      "claims": claims,
+    })
+  } else {
+    c.JSON(http.StatusOK, gin.H{
+      "error": err,
+    })
+  }
+}
+
+// GET ROUTES
 
 func getUsers(c *gin.Context)  {
   mongo := os.Getenv("MONGODB_URI")
@@ -64,6 +138,8 @@ func getGames(c *gin.Context)  {
     "games": data,
   })
 }
+
+// POST ROUTES
 
 func postUser(c *gin.Context)  {
   username := c.PostForm("username")
@@ -139,6 +215,8 @@ func postGame(c *gin.Context)  {
 
 }
 
+// DELETE ROUTES
+
 func deleteUser(c *gin.Context)  {
   time, _ := strconv.Atoi(c.Param("time"))
 
@@ -172,10 +250,13 @@ func deleteGame(c *gin.Context){
   err = games.Remove(bson.M{"timestamp":time})
 }
 
+// PUT ROUTES
+
 func patchUser(c *gin.Context){
   username := c.PostForm("username")
   email := c.PostForm("email")
   password := c.PostForm("password")
+  time, _ := strconv.Atoi(c.Param("time"))
 
   mongo := os.Getenv("MONGODB_URI")
   db := os.Getenv("DATABASE_NAME")
@@ -211,6 +292,7 @@ func patchGame(c *gin.Context){
   operatorPort := c.PostForm("operatorPort")
   operativePort := c.PostForm("operativePort")
   operativeLocation := c.PostForm("operativeLocation")
+  time, _ := strconv.Atoi(c.Param("time"))
 
   mongo := os.Getenv("MONGODB_URI")
   db := os.Getenv("DATABASE_NAME")
@@ -242,6 +324,9 @@ func patchGame(c *gin.Context){
     "games": data,
   })
 }
+
+
+// INDEX HANDLER
 
 func indexHandler(c *gin.Context)  {
   c.JSON(http.StatusOK, gin.H{
