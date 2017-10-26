@@ -26,6 +26,7 @@ type User struct {
 type Game struct {
   ID bson.ObjectId `json:"id" bson:"_id,omitempty"`
   Owner string `json:"owner"`
+  OwnerRole string `json:"ownerRole"`
   Room string `json:"room"`
   Password string `json:"password"`
   Timestamp int32 `json:"timestamp"`
@@ -170,6 +171,7 @@ func postUser(c *gin.Context)  {
 
 func postGame(c *gin.Context)  {
   owner := c.PostForm("owner")
+  ownerRole := c.PostForm("ownerRole")
   room := c.PostForm("room")
   password := c.PostForm("password")
   timestamp := int32(time.Now().Unix())
@@ -187,6 +189,7 @@ func postGame(c *gin.Context)  {
   games := session.DB(db).C("game")
   err = games.Insert(&Game{
     Owner: owner,
+    OwnerRole: ownerRole,
     Room: room,
     Password: password,
     Timestamp: timestamp,
@@ -274,6 +277,7 @@ func patchUser(c *gin.Context){
 
 func patchGame(c *gin.Context){
   owner := c.PostForm("owner")
+  ownerRole := c.PostForm("ownerRole")
   room := c.PostForm("room")
   password := c.PostForm("password")
   operatorPassword := c.PostForm("operatorPassword")
@@ -292,6 +296,7 @@ func patchGame(c *gin.Context){
 
   update := bson.M{
     "owner": owner,
+    "ownerRole": ownerRole,
     "room": room,
     "password": password,
     "operatorPassword": operatorPassword,
