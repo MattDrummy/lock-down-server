@@ -27,8 +27,6 @@ type Game struct {
   ID bson.ObjectId `json:"id" bson:"_id,omitempty"`
   Owner string `json:"owner"`
   Room string `json:"room"`
-  Operator string `json:"operator"`
-  Operative string `json:"operative"`
   Password string `json:"password"`
   Timestamp int32 `json:"timestamp"`
   OperatorPassword string `json:"operatorPassword"`
@@ -173,8 +171,6 @@ func postUser(c *gin.Context)  {
 func postGame(c *gin.Context)  {
   owner := c.PostForm("owner")
   room := c.PostForm("room")
-  operator := c.PostForm("operator")
-  operative := c.PostForm("operative")
   password := c.PostForm("password")
   timestamp := int32(time.Now().Unix())
   operatorPassword := c.PostForm("operatorPassword")
@@ -281,8 +277,6 @@ func patchUser(c *gin.Context){
 func patchGame(c *gin.Context){
   owner := c.PostForm("owner")
   room := c.PostForm("room")
-  operator := c.PostForm("operator")
-  operative := c.PostForm("operative")
   password := c.PostForm("password")
   operatorPassword := c.PostForm("operatorPassword")
   operatorPort := c.PostForm("operatorPort")
