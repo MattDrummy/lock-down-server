@@ -188,8 +188,6 @@ func postGame(c *gin.Context)  {
   err = games.Insert(&Game{
     Owner: owner,
     Room: room,
-    Operator: operator,
-    Operative: operative,
     Password: password,
     Timestamp: timestamp,
     OperatorPassword: operatorPassword,
@@ -295,8 +293,6 @@ func patchGame(c *gin.Context){
   update := bson.M{
     "owner": owner,
     "room": room,
-    "operator": operator,
-    "operative": operative,
     "password": password,
     "operatorPassword": operatorPassword,
     "operatorPort": operatorPort,
