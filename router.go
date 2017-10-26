@@ -31,7 +31,6 @@ type Game struct {
   Operative string `json:"operative"`
   Password string `json:"password"`
   Timestamp int32 `json:"timestamp"`
-  OperatorLocation string `json:"operatorLocation"`
   OperatorPassword string `json:"operatorPassword"`
   OperatorPort string `json:"operatorPort"`
   OperativePort string `json:"operativePort"`
@@ -178,7 +177,6 @@ func postGame(c *gin.Context)  {
   operative := c.PostForm("operative")
   password := c.PostForm("password")
   timestamp := int32(time.Now().Unix())
-  operatorLocation := c.PostForm("operatorLocation")
   operatorPassword := c.PostForm("operatorPassword")
   operatorPort := c.PostForm("operatorPort")
   operativePort := c.PostForm("operativePort")
@@ -198,7 +196,6 @@ func postGame(c *gin.Context)  {
     Operative: operative,
     Password: password,
     Timestamp: timestamp,
-    OperatorLocation: operatorLocation,
     OperatorPassword: operatorPassword,
     OperatorPort: operatorPort,
     OperativePort: operativePort,
@@ -287,7 +284,6 @@ func patchGame(c *gin.Context){
   operator := c.PostForm("operator")
   operative := c.PostForm("operative")
   password := c.PostForm("password")
-  operatorLocation := c.PostForm("operatorLocation")
   operatorPassword := c.PostForm("operatorPassword")
   operatorPort := c.PostForm("operatorPort")
   operativePort := c.PostForm("operativePort")
@@ -308,7 +304,6 @@ func patchGame(c *gin.Context){
     "operator": operator,
     "operative": operative,
     "password": password,
-    "operatorLocation": operatorLocation,
     "operatorPassword": operatorPassword,
     "operatorPort": operatorPort,
     "operativePort": operativePort,
