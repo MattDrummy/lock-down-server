@@ -1,73 +1,72 @@
 package main
 
 import (
-  "os"
-  "log"
+	"log"
+	"os"
 
-  "github.com/gin-gonic/gin"
-  "github.com/joho/godotenv"
-  "github.com/gin-contrib/cors"
-  "github.com/googollee/go-socket.io"
-
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/googollee/go-socket.io"
+	"github.com/joho/godotenv"
 )
 
-func main()  {
-  err := godotenv.Load()
-  if err != nil {
-    log.Println(err)
-  }
-  port := os.Getenv("PORT")
-  client := os.Getenv("CLIENT_URL")
-  router := gin.Default()
-  router.Use(cors.New(cors.Config{
-    AllowOrigins: []string{client},
-    AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-    AllowHeaders: []string{"Origin"},
-    ExposeHeaders: []string{"Content-Length"},
-    AllowCredentials: true,
-  }))
-  socket, err := socketio.NewServer(nil)
-  if err != nil {
-    log.Println(err)
-  }
+func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err)
+	}
+	port := os.Getenv("PORT")
+	client := os.Getenv("CLIENT_URL")
+	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{client},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+	socket, err := socketio.NewServer(nil)
+	if err != nil {
+		log.Println(err)
+	}
 
-  // INDEX ROUTE
+	// INDEX ROUTE
 
-  router.GET("/", indexHandler)
+	router.GET("/", indexHandler)
 
-  // EMAIL
+	// EMAIL
 
-  router.POST("/email", emailHandler)
-  
-  // JWT
+	router.POST("/email", emailHandler)
 
-  router.POST("/signJWT", signJWT)
-  router.POST("/verifyJWT", verifyJWT)
+	// JWT
 
-  // SOCKETS
+	router.POST("/signJWT", signJWT)
+	router.POST("/verifyJWT", verifyJWT)
 
-  socket.On("connection", socketConnectionHandler)
-  socket.On("error", socketErorrHandler)
-  router.GET("/socket.io/", gin.WrapH(socket))
-  router.POST("/socket.io/", gin.WrapH(socket))
+	// SOCKETS
 
-  // USER DB
+	socket.On("connection", socketConnectionHandler)
+	socket.On("error", socketErorrHandler)
+	router.GET("/socket.io/", gin.WrapH(socket))
+	router.POST("/socket.io/", gin.WrapH(socket))
 
-  router.GET("api/v1/users", getUsers)
-  router.POST("api/v1/users", postUser)
-  router.DELETE("api/v1/users/:time", deleteUser)
-  router.PUT("api/v1/users/:time", patchUser)
+	// USER DB
 
-  // GAME DB
+	router.GET("api/v1/users", getUsers)
+	router.POST("api/v1/users", postUser)
+	router.DELETE("api/v1/users/:time", deleteUser)
+	router.PUT("api/v1/users/:time", patchUser)
 
-  router.GET("api/v1/games", getGames)
-  router.POST("api/v1/games", postGame)
-  router.DELETE("api/v1/games/:time", deleteGame)
-  router.PUT("api/v1/games/:time", patchGame)
+	// GAME DB
 
-  // LOG AND RUN
+	router.GET("api/v1/games", getGames)
+	router.POST("api/v1/games", postGame)
+	router.DELETE("api/v1/games/:time", deleteGame)
+	router.PUT("api/v1/games/:time", patchGame)
 
-  log.Println("server ready on port: " + port)
-  log.Println("CORS allowed on " + client)
-  router.Run(":" + port)
+	// LOG AND RUN
+
+	log.Println("server ready on port: " + port)
+	log.Println("CORS allowed on " + client)
+	router.Run(":" + port)
 }
