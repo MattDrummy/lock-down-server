@@ -74,6 +74,7 @@ func signJWT(c *gin.Context) {
 		"username": c.PostForm("username"),
 		"email":    c.PostForm("email"),
 		"password": c.PostForm("password"),
+		"timestamp": c.PostForm("timestamp"),
 	}
 	tokenString := createToken(claims)
 	c.JSON(http.StatusOK, gin.H{
@@ -140,7 +141,7 @@ func getGames(c *gin.Context) {
 func getOneUser(c *gin.Context)  {
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
-	timestamp, _ := strconv.Atoi(c.Param("time"))
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 	session, err := mgo.Dial(mongo)
 	if err != nil {
 		log.Println(err)
@@ -156,7 +157,7 @@ func getOneUser(c *gin.Context)  {
 func getOneGame(c *gin.Context)  {
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
-	timestamp, _ := strconv.Atoi(c.Param("time"))
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 	session, err := mgo.Dial(mongo)
 	if err != nil {
 		log.Println(err)
@@ -243,7 +244,7 @@ func postGame(c *gin.Context) {
 // DELETE ROUTES
 
 func deleteUser(c *gin.Context) {
-	time, _ := strconv.Atoi(c.Param("time"))
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
@@ -252,7 +253,7 @@ func deleteUser(c *gin.Context) {
 		log.Println(err)
 	}
 	users := session.DB(db).C("user")
-	err = users.Remove(bson.M{"timestamp": time})
+	err = users.Remove(bson.M{"timestamp": timestamp})
 	if err != nil {
 		log.Println(err)
 	}
@@ -263,7 +264,7 @@ func deleteUser(c *gin.Context) {
 }
 
 func deleteGame(c *gin.Context) {
-	time, _ := strconv.Atoi(c.Param("time"))
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
@@ -272,7 +273,7 @@ func deleteGame(c *gin.Context) {
 		log.Println(err)
 	}
 	games := session.DB(db).C("game")
-	err = games.Remove(bson.M{"timestamp": time})
+	err = games.Remove(bson.M{"timestamp": timestamp})
 }
 
 // PUT ROUTES
@@ -281,7 +282,7 @@ func patchUser(c *gin.Context) {
 	username := c.PostForm("username")
 	email := c.PostForm("email")
 	password := c.PostForm("password")
-	time, _ := strconv.Atoi(c.Param("time"))
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
@@ -297,10 +298,10 @@ func patchUser(c *gin.Context) {
 		"password": password,
 	}
 	change := bson.M{"$set": update}
-	users.Update(bson.M{"timestamp": time}, change)
+	users.Update(bson.M{"timestamp": timestamp}, change)
 
 	var data []User
-	users.Find(bson.M{"timestamp": time}).All(&data)
+	users.Find(bson.M{"timestamp": timestamp}).All(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"users": data,
 	})
@@ -315,7 +316,7 @@ func patchGame(c *gin.Context) {
 	operatorPort := c.PostForm("operatorPort")
 	operativePort := c.PostForm("operativePort")
 	operativeLocation := c.PostForm("operativeLocation")
-	time, _ := strconv.Atoi(c.Param("time"))
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
@@ -336,10 +337,10 @@ func patchGame(c *gin.Context) {
 		"operativeLocation": operativeLocation,
 	}
 	change := bson.M{"$set": update}
-	games.Update(bson.M{"timestamp": time}, change)
+	games.Update(bson.M{"timestamp": timestamp}, change)
 
 	var data []Game
-	games.Find(bson.M{"timestamp": time}).All(&data)
+	games.Find(bson.M{"timestamp": timestamp}).All(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"games": data,
 	})
