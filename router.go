@@ -96,6 +96,7 @@ func verifyJWT(c *gin.Context) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		c.JSON(http.StatusOK, gin.H{
 			"claims": claims,
+			"valid": token.Valid,
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
@@ -136,6 +137,37 @@ func getGames(c *gin.Context) {
 	})
 }
 
+func getOneUser(c *gin.Context)  {
+	mongo := os.Getenv("MONGODB_URI")
+	db := os.Getenv("DATABASE_NAME")
+	timestamp, _ := strconv.Atoi(c.Param("time"))
+	session, err := mgo.Dial(mongo)
+	if err != nil {
+		log.Println(err)
+	}
+	users := session.DB(db).C("user")
+	var data []User
+	users.Find(bson.M{"timestamp": timestamp}).All(&data)
+	c.JSON(http.StatusOK, gin.H{
+		"user": data,
+	})
+}
+
+func getOneGame(c *gin.Context)  {
+	mongo := os.Getenv("MONGODB_URI")
+	db := os.Getenv("DATABASE_NAME")
+	timestamp, _ := strconv.Atoi(c.Param("time"))
+	session, err := mgo.Dial(mongo)
+	if err != nil {
+		log.Println(err)
+	}
+	games := session.DB(db).C("game")
+	var data []Game
+	games.Find(bson.M{"timestamp": timestamp}).All(&data)
+	c.JSON(http.StatusOK, gin.H{
+		"game": data,
+	})
+}
 // POST ROUTES
 
 func postUser(c *gin.Context) {
@@ -161,7 +193,7 @@ func postUser(c *gin.Context) {
 		log.Println(err)
 	}
 	var data []User
-	users.Find(nil).All(&data)
+	users.Find(bson.M{"timestamp": timestamp}).All(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"users": data,
 	})
@@ -201,7 +233,7 @@ func postGame(c *gin.Context) {
 		log.Println(err)
 	}
 	var data []Game
-	games.Find(nil).All(&data)
+	games.Find(bson.M{"timestamp": timestamp}).All(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"games": data,
 	})
@@ -268,7 +300,7 @@ func patchUser(c *gin.Context) {
 	users.Update(bson.M{"timestamp": time}, change)
 
 	var data []User
-	users.Find(nil).All(&data)
+	users.Find(bson.M{"timestamp": time}).All(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"users": data,
 	})
@@ -307,7 +339,7 @@ func patchGame(c *gin.Context) {
 	games.Update(bson.M{"timestamp": time}, change)
 
 	var data []Game
-	games.Find(nil).All(&data)
+	games.Find(bson.M{"timestamp": time}).All(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"games": data,
 	})

@@ -53,6 +53,7 @@ func main() {
 	// USER DB
 
 	router.GET("api/v1/users", getUsers)
+	router.GET("api/v1/users/:time", getOneUser)
 	router.POST("api/v1/users", postUser)
 	router.DELETE("api/v1/users/:time", deleteUser)
 	router.PUT("api/v1/users/:time", patchUser)
@@ -60,6 +61,7 @@ func main() {
 	// GAME DB
 
 	router.GET("api/v1/games", getGames)
+	router.GET("api/v1/games/:time", getOneGame)
 	router.POST("api/v1/games", postGame)
 	router.DELETE("api/v1/games/:time", deleteGame)
 	router.PUT("api/v1/games/:time", patchGame)
