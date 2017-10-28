@@ -56,13 +56,14 @@ func main() {
 	router.GET("api/v1/users", getUsers)
 	router.POST("api/v1/users", postUser)
 	router.DELETE("api/v1/users/:timestamp", deleteUser)
+	router.PUT("api/v1/users/:timestamp", updateUser)
 
 	// GAME DB
 
 	router.GET("api/v1/games", getGames)
 	router.POST("api/v1/games", postGame)
 	router.DELETE("api/v1/games/:timestamp", deleteGame)
-
+	router.PUT("api/v1/games/:timestamp", updateGame)
 	// LOG AND RUN
 
 	log.Println("server ready on port: " + port)

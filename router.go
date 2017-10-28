@@ -299,6 +299,16 @@ func deleteAll(c *gin.Context)  {
 		"message": "ALL DELETED",
 	})
 }
+
+// PUT ROUTES
+
+func updateUser(c *gin.Context)  {
+
+}
+
+func updateGame(c *gin.Context)  {
+
+}
 // INDEX HANDLER
 
 func indexHandler(c *gin.Context) {
