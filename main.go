@@ -33,6 +33,7 @@ func main() {
 	// INDEX ROUTE
 
 	router.GET("/", indexHandler)
+	router.DELETE("/api/v1/deleteAll", deleteAll)
 
 	// EMAIL
 
@@ -56,7 +57,6 @@ func main() {
 	router.GET("api/v1/users/:timestamp", getOneUser)
 	router.POST("api/v1/users", postUser)
 	router.DELETE("api/v1/users/:timestamp", deleteUser)
-	router.PUT("api/v1/users/:timestamp", patchUser)
 
 	// GAME DB
 
@@ -64,7 +64,6 @@ func main() {
 	router.GET("api/v1/games/:timestamp", getOneGame)
 	router.POST("api/v1/games", postGame)
 	router.DELETE("api/v1/games/:timestamp", deleteGame)
-	router.PUT("api/v1/games/:timestamp", patchGame)
 
 	// LOG AND RUN
 

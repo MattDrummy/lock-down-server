@@ -54,7 +54,7 @@ func emailHandler(c *gin.Context) {
 	}
 }
 
-// JWT
+// AUTH
 
 func createToken(claims *jwt.MapClaims) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -185,21 +185,30 @@ func postUser(c *gin.Context) {
 		log.Println(err)
 	}
 	users := session.DB(db).C("user")
-	err = users.Insert(&User{
-		Username:  username,
-		Email:     email,
-		Timestamp: timestamp,
-		Password:  password,
-	})
-	if err != nil {
-		log.Println(err)
-	}
-	var data []User
-	users.Find(bson.M{"timestamp": timestamp}).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"users": data,
-	})
+	var check []User
+	users.Find(bson.M{"username": username}).All(&check)
+	log.Println(len(check))
+	if len(check) > 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User already exists, you must create a unique username",
+		})
+	} else {
+		err = users.Insert(&User{
+			Username:  username,
+			Email:     email,
+			Timestamp: timestamp,
+			Password:  password,
+		})
+		if err != nil {
+			log.Println(err)
+		}
+		var data []User
+		users.Find(bson.M{"timestamp": timestamp}).All(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"users": data,
+		})
 
+	}
 }
 
 func postGame(c *gin.Context) {
@@ -219,24 +228,34 @@ func postGame(c *gin.Context) {
 		log.Println(err)
 	}
 	games := session.DB(db).C("game")
-	err = games.Insert(&Game{
-		Owner:             owner,
-		OwnerRole:         ownerRole,
-		PublicRoom: publicRoom,
-		Timestamp:         timestamp,
-		OperatorPassword:  operatorPassword,
-		OperatorPort:      operatorPort,
-		OperativePort:     operativePort,
-		OperativeLocation: operativeLocation,
-	})
-	if err != nil {
-		log.Println(err)
+
+	var check []Game
+	games.Find(bson.M{"owner": owner}).All(&check)
+	if len(check) > 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Each user can only own one game, You must delete your game from the game-lobby before creating a new game",
+		})
+	} else {
+		err = games.Insert(&Game{
+			Owner:             owner,
+			OwnerRole:         ownerRole,
+			PublicRoom: publicRoom,
+			Timestamp:         timestamp,
+			OperatorPassword:  operatorPassword,
+			OperatorPort:      operatorPort,
+			OperativePort:     operativePort,
+			OperativeLocation: operativeLocation,
+		})
+		if err != nil {
+			log.Println(err)
+		}
+		var data []Game
+		games.Find(bson.M{"timestamp": timestamp}).All(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"games": data,
+		})
 	}
-	var data []Game
-	games.Find(bson.M{"timestamp": timestamp}).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"games": data,
-	})
+
 
 }
 
@@ -278,47 +297,7 @@ func deleteGame(c *gin.Context) {
 	})
 }
 
-// PUT ROUTES
-
-func patchUser(c *gin.Context) {
-	username := c.PostForm("username")
-	email := c.PostForm("email")
-	password := c.PostForm("password")
-	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
-
-	mongo := os.Getenv("MONGODB_URI")
-	db := os.Getenv("DATABASE_NAME")
-	session, err := mgo.Dial(mongo)
-	if err != nil {
-		log.Println(err)
-	}
-	users := session.DB(db).C("user")
-
-	update := bson.M{
-		"username": username,
-		"email":    email,
-		"password": password,
-	}
-	change := bson.M{"$set": update}
-	users.Update(bson.M{"timestamp": timestamp}, change)
-
-	var data []User
-	users.Find(bson.M{"timestamp": timestamp}).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"users": data,
-	})
-}
-
-func patchGame(c *gin.Context) {
-	owner := c.PostForm("owner")
-	ownerRole := c.PostForm("ownerRole")
-	publicRoom, _ := strconv.ParseBool(c.PostForm("publicRoom"))
-	operatorPassword := c.PostForm("operatorPassword")
-	operatorPort := c.PostForm("operatorPort")
-	operativePort := c.PostForm("operativePort")
-	operativeLocation := c.PostForm("operativeLocation")
-	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
-
+func deleteAll(c *gin.Context)  {
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
 	session, err := mgo.Dial(mongo)
@@ -326,26 +305,13 @@ func patchGame(c *gin.Context) {
 		log.Println(err)
 	}
 	games := session.DB(db).C("game")
-
-	update := bson.M{
-		"owner":             owner,
-		"ownerRole":         ownerRole,
-		"publicRoom": publicRoom,
-		"operatorPassword":  operatorPassword,
-		"operatorPort":      operatorPort,
-		"operativePort":     operativePort,
-		"operativeLocation": operativeLocation,
-	}
-	change := bson.M{"$set": update}
-	games.Update(bson.M{"timestamp": timestamp}, change)
-
-	var data []Game
-	games.Find(bson.M{"timestamp": timestamp}).All(&data)
+	users := session.DB(db).C("user")
+	games.DropCollection()
+	users.DropCollection()
 	c.JSON(http.StatusOK, gin.H{
-		"games": data,
+		"message": "ALL DELETED",
 	})
 }
-
 // INDEX HANDLER
 
 func indexHandler(c *gin.Context) {
