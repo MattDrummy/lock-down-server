@@ -27,8 +27,7 @@ type Game struct {
 	ID                bson.ObjectId `json:"id" bson:"_id,omitempty"`
 	Owner             string        `json:"owner"`
 	OwnerRole         string        `json:"ownerRole"`
-	Room              string        `json:"room"`
-	Password          string        `json:"password"`
+	PublicRoom bool `json:"publicRoom"`
 	Timestamp         int32         `json:"timestamp"`
 	OperatorPassword  string        `json:"operatorPassword"`
 	OperatorPort      string        `json:"operatorPort"`
@@ -206,8 +205,7 @@ func postUser(c *gin.Context) {
 func postGame(c *gin.Context) {
 	owner := c.PostForm("owner")
 	ownerRole := c.PostForm("ownerRole")
-	room := c.PostForm("room")
-	password := c.PostForm("password")
+	publicRoom, _ := strconv.ParseBool(c.PostForm("publicRoom"))
 	timestamp := int32(time.Now().Unix())
 	operatorPassword := c.PostForm("operatorPassword")
 	operatorPort := c.PostForm("operatorPort")
@@ -224,8 +222,7 @@ func postGame(c *gin.Context) {
 	err = games.Insert(&Game{
 		Owner:             owner,
 		OwnerRole:         ownerRole,
-		Room:              room,
-		Password:          password,
+		PublicRoom: publicRoom,
 		Timestamp:         timestamp,
 		OperatorPassword:  operatorPassword,
 		OperatorPort:      operatorPort,
@@ -276,6 +273,9 @@ func deleteGame(c *gin.Context) {
 	}
 	games := session.DB(db).C("game")
 	err = games.Remove(bson.M{"timestamp": timestamp})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "deleted",
+	})
 }
 
 // PUT ROUTES
@@ -312,8 +312,7 @@ func patchUser(c *gin.Context) {
 func patchGame(c *gin.Context) {
 	owner := c.PostForm("owner")
 	ownerRole := c.PostForm("ownerRole")
-	room := c.PostForm("room")
-	password := c.PostForm("password")
+	publicRoom, _ := strconv.ParseBool(c.PostForm("publicRoom"))
 	operatorPassword := c.PostForm("operatorPassword")
 	operatorPort := c.PostForm("operatorPort")
 	operativePort := c.PostForm("operativePort")
@@ -331,8 +330,7 @@ func patchGame(c *gin.Context) {
 	update := bson.M{
 		"owner":             owner,
 		"ownerRole":         ownerRole,
-		"room":              room,
-		"password":          password,
+		"publicRoom": publicRoom,
 		"operatorPassword":  operatorPassword,
 		"operatorPort":      operatorPort,
 		"operativePort":     operativePort,
