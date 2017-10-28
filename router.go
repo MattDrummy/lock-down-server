@@ -173,9 +173,7 @@ func getOneGame(c *gin.Context)  {
 func postUser(c *gin.Context) {
 	username := c.PostForm("username")
 	email := c.PostForm("email")
-	password := createToken(&jwt.MapClaims{
-		"password": c.PostForm("password"),
-	})
+	password := c.PostForm("password")
 	timestamp := int32(time.Now().Unix())
 
 	mongo := os.Getenv("MONGODB_URI")
