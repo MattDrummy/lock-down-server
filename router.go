@@ -115,11 +115,21 @@ func getUsers(c *gin.Context) {
 		log.Println(err)
 	}
 	users := session.DB(db).C("user")
-	var data []User
-	users.Find(nil).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"users": data,
-	})
+	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
+	log.Println(timestamp)
+	if timestamp != 0 {
+		var data User
+		users.Find(bson.M{"timestamp": timestamp}).One(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"user": data,
+		})
+	} else {
+		var data []User
+		users.Find(nil).All(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"users": data,
+		})
+	}
 }
 
 func getGames(c *gin.Context) {
@@ -130,44 +140,25 @@ func getGames(c *gin.Context) {
 		log.Println(err)
 	}
 	games := session.DB(db).C("game")
-	var data []Game
-	games.Find(nil).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"games": data,
-	})
+	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
+	log.Println(timestamp)
+
+	if timestamp != 0 {
+		var data Game
+		games.Find(bson.M{"timestamp": timestamp}).One(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"game": data,
+		})
+	} else {
+		var data []Game
+		games.Find(nil).All(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"games": data,
+		})
+	}
 }
 
-func getOneUser(c *gin.Context)  {
-	mongo := os.Getenv("MONGODB_URI")
-	db := os.Getenv("DATABASE_NAME")
-	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
-	session, err := mgo.Dial(mongo)
-	if err != nil {
-		log.Println(err)
-	}
-	users := session.DB(db).C("user")
-	var data []User
-	users.Find(bson.M{"timestamp": timestamp}).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"user": data,
-	})
-}
 
-func getOneGame(c *gin.Context)  {
-	mongo := os.Getenv("MONGODB_URI")
-	db := os.Getenv("DATABASE_NAME")
-	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
-	session, err := mgo.Dial(mongo)
-	if err != nil {
-		log.Println(err)
-	}
-	games := session.DB(db).C("game")
-	var data []Game
-	games.Find(bson.M{"timestamp": timestamp}).All(&data)
-	c.JSON(http.StatusOK, gin.H{
-		"game": data,
-	})
-}
 // POST ROUTES
 
 func postUser(c *gin.Context) {
@@ -273,10 +264,7 @@ func deleteUser(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "deleted",
-	})
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func deleteGame(c *gin.Context) {
@@ -290,9 +278,10 @@ func deleteGame(c *gin.Context) {
 	}
 	games := session.DB(db).C("game")
 	err = games.Remove(bson.M{"timestamp": timestamp})
-	c.JSON(http.StatusOK, gin.H{
-		"message": "deleted",
-	})
+	if err != nil {
+		log.Println(err)
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func deleteAll(c *gin.Context)  {
