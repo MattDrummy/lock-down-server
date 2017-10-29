@@ -219,7 +219,7 @@ func postGame(c *gin.Context) {
 	games.Find(bson.M{"owner": owner}).All(&check)
 	if len(check) > 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Each user can only own one game, You must delete your game from the game-lobby before creating a new game",
+			"error": "Each user may only have one game in the lobby for their username.  An existing game exists under this username, would you like to delete that game and start again?  Clicking OK will reload the page, and you will have to recreate the game.",
 		})
 	} else {
 		err = games.Insert(&Game{
