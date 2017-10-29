@@ -148,8 +148,7 @@ func getGames(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"game": data,
 		})
-	}
-	if owner {
+	} else if len(owner) != 0 {
 		var data Game
 		games.Find(bson.M{"owner": owner}).One(&data)
 		c.JSON(http.StatusOK, gin.H{
