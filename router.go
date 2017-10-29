@@ -81,7 +81,7 @@ func signJWT(c *gin.Context) {
 	})
 }
 
-func verifyJWT(c *gin.Context) {
+func logIn(c *gin.Context) {
 	tokenString := c.PostForm("tokenString")
 	secretKey := os.Getenv("HMAC_SECRET_KEY")
 	hmacSampleSecret := []byte(secretKey)
@@ -116,7 +116,6 @@ func getUsers(c *gin.Context) {
 	}
 	users := session.DB(db).C("user")
 	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
-	log.Println(timestamp)
 	if timestamp != 0 {
 		var data User
 		users.Find(bson.M{"timestamp": timestamp}).One(&data)
@@ -141,7 +140,6 @@ func getGames(c *gin.Context) {
 	}
 	games := session.DB(db).C("game")
 	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
-	log.Println(timestamp)
 
 	if timestamp != 0 {
 		var data Game
@@ -176,7 +174,6 @@ func postUser(c *gin.Context) {
 	users := session.DB(db).C("user")
 	var check []User
 	users.Find(bson.M{"username": username}).All(&check)
-	log.Println(len(check))
 	if len(check) > 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "User already exists, you must create a unique username",
@@ -303,12 +300,33 @@ func deleteAll(c *gin.Context)  {
 // PUT ROUTES
 
 func updateUser(c *gin.Context)  {
-
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
+	username := c.PostForm("username")
+	email := c.PostForm("email")
+	password := c.PostForm("password")
+	update := bson.M{
+		"username": username,
+		"email": email,
+		"password": password,
+	}
+	change := bson.M{
+		"$set": update,
+	}
+	mongo := os.Getenv("MONGODB_URI")
+	db := os.Getenv("DATABASE_NAME")
+	session, err := mgo.Dial(mongo)
+	if err != nil {
+		log.Println(err)
+	}
+	users := session.DB(db).C("user")
+	users.Update(bson.M{"timestamp": timestamp}, change)
+	var data User
+	users.Find(bson.M{"timestamp": timestamp}).One(&data)
+	c.JSON(http.StatusOK, gin.H{
+		"user": data,
+	})
 }
 
-func updateGame(c *gin.Context)  {
-
-}
 // INDEX HANDLER
 
 func indexHandler(c *gin.Context) {
