@@ -176,7 +176,7 @@ func postUser(c *gin.Context) {
 	users.Find(bson.M{"username": username}).All(&check)
 	if len(check) > 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "User already exists, you must create a unique username",
+			"error": "This username is already taken.",
 		})
 	} else {
 		err = users.Insert(&User{
