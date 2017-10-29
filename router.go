@@ -140,10 +140,18 @@ func getGames(c *gin.Context) {
 	}
 	games := session.DB(db).C("game")
 	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
+	owner := c.Query("owner")
 
 	if timestamp != 0 {
 		var data Game
 		games.Find(bson.M{"timestamp": timestamp}).One(&data)
+		c.JSON(http.StatusOK, gin.H{
+			"game": data,
+		})
+	}
+	if owner {
+		var data Game
+		games.Find(bson.M{"owner": owner}).One(&data)
 		c.JSON(http.StatusOK, gin.H{
 			"game": data,
 		})
