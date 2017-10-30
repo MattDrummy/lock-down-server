@@ -385,6 +385,30 @@ func updateUser(c *gin.Context)  {
 	})
 }
 
+func updateGame()  {
+	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
+	publicRoom, _ := strconv.ParseBool(c.PostForm("publicRoom"))
+	update := bson.M{
+		"publicRoom": publicRoom,
+	}
+	change := bson.M{
+		"$set": update
+	}
+	mongo := os.Getenv("MONGODB_URI")
+	db := os.Getenv("DATABASE_NAME")
+	session, err := mgo.Dial(mongo)
+	if err != nil {
+		log.Println(err)
+	}
+	games := session.DB(db).C("game")
+	games.Update(bson.M{"timestamp": timestamp}, change)
+	var data Game
+	games.Find(bson.M{"timestamp": timestamp}).One(&data)
+	c.JSON(http.StatusOK, gin.H{
+		"game": data,
+	})
+}
+
 // INDEX HANDLER
 
 func indexHandler(c *gin.Context) {

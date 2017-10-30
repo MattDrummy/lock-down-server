@@ -31,14 +31,13 @@ func socketConnectionHandler(s socketio.Socket) {
 	s.On("disconnection", func() {
 		log.Println("a user has disconnected")
 	})
-	s.On("reloadLobby", func(){
-		log.Println("a user wishes to reload the lobby")
-		s.BroadcastTo("lobby", "reloadLobby", "")
+	s.On("deleteGame", func(){
+		log.Println("a user has deleted a game")
+		s.BroadcastTo("lobby", "deleteGame", "")
 	})
-	s.On("gameAdded", func(room string){
-		s.Join(room)
+	s.On("gameAdded", func(){
 		log.Println("a user has added a game")
-		s.BroadcastTo(room, "gameAdded", "")
+		s.BroadcastTo("lobby", "gameAdded", "")
 	})
 }
 
