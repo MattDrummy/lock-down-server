@@ -31,6 +31,15 @@ func socketConnectionHandler(s socketio.Socket) {
 	s.On("disconnection", func() {
 		log.Println("a user has disconnected")
 	})
+	s.On("reloadLobby", func(){
+		log.Println("a user wishes to reload the lobby")
+		s.BroadcastTo("lobby", "reloadLobby", "")
+	})
+	s.On("gameAdded", func(room string){
+		s.Join(room)
+		log.Println("a user has added a game")
+		s.BroadcastTo(room, "gameAdded", "")
+	})
 }
 
 func socketErorrHandler(s socketio.Socket, err error) {
