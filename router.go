@@ -134,9 +134,16 @@ func getUsers(c *gin.Context) {
 	} else {
 		var data []User
 		users.Find(nil).All(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"users": data,
-		})
+		if data == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"users": make([]int, 0),
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"users": data,
+			})
+
+		}
 	}
 }
 
@@ -180,9 +187,16 @@ func getGames(c *gin.Context) {
 	} else {
 		var data []Game
 		games.Find(nil).All(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"games": data,
-		})
+		if data == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"games": make([]int, 0),
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"games": data,
+			})
+
+		}
 	}
 }
 
