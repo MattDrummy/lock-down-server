@@ -115,8 +115,10 @@ func getUsers(c *gin.Context) {
 		log.Println(err)
 	}
 	users := session.DB(db).C("user")
-	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
-	if timestamp != 0 {
+	time := c.Query("timestamp")
+	
+	if len(time) != 0 {
+		timestamp, _ := strconv.Atoi(time)
 		var data User
 		users.Find(bson.M{"timestamp": timestamp}).One(&data)
 		c.JSON(http.StatusOK, gin.H{
@@ -139,10 +141,11 @@ func getGames(c *gin.Context) {
 		log.Println(err)
 	}
 	games := session.DB(db).C("game")
-	timestamp, _ := strconv.Atoi(c.Query("timestamp"))
+	time := c.Query("timestamp")
 	owner := c.Query("owner")
 
-	if timestamp != 0 {
+	if len(time) != 0 {
+		timestamp, _ := strconv.Atoi(time)
 		var data Game
 		games.Find(bson.M{"timestamp": timestamp}).One(&data)
 		c.JSON(http.StatusOK, gin.H{
