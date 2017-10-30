@@ -31,6 +31,10 @@ func socketConnectionHandler(s socketio.Socket) {
 	s.On("disconnection", func() {
 		log.Println("a user has disconnected")
 	})
+	s.On("updateRecord", func(){
+		s.Emit("updateRecord", "")
+		s.BroadcastTo("lobby", "updateRecord", "")
+	})
 }
 
 func socketErorrHandler(s socketio.Socket, err error) {
