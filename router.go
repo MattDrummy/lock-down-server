@@ -116,14 +116,21 @@ func getUsers(c *gin.Context) {
 	}
 	users := session.DB(db).C("user")
 	time := c.Query("timestamp")
-	
+
 	if len(time) != 0 {
 		timestamp, _ := strconv.Atoi(time)
 		var data User
 		users.Find(bson.M{"timestamp": timestamp}).One(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"user": data,
-		})
+		if data.Timestamp == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "nothing found",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"user": data,
+			})
+		}
+
 	} else {
 		var data []User
 		users.Find(nil).All(&data)
@@ -148,15 +155,28 @@ func getGames(c *gin.Context) {
 		timestamp, _ := strconv.Atoi(time)
 		var data Game
 		games.Find(bson.M{"timestamp": timestamp}).One(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"game": data,
-		})
+		if data.Timestamp == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "nothing found",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"game": data,
+			})
+		}
 	} else if len(owner) != 0 {
 		var data Game
 		games.Find(bson.M{"owner": owner}).One(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"game": data,
-		})
+		if data.Timestamp == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "nothing found",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"game": data,
+			})
+		}
+
 	} else {
 		var data []Game
 		games.Find(nil).All(&data)
@@ -196,14 +216,16 @@ func postUser(c *gin.Context) {
 			Password:  password,
 		})
 		if err != nil {
-			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "failed insert",
+			})
+		} else {
+			var data []User
+			users.Find(bson.M{"timestamp": timestamp}).All(&data)
+			c.JSON(http.StatusOK, gin.H{
+				"users": data,
+			})
 		}
-		var data []User
-		users.Find(bson.M{"timestamp": timestamp}).All(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"users": data,
-		})
-
 	}
 }
 
@@ -243,13 +265,17 @@ func postGame(c *gin.Context) {
 			OperativeLocation: operativeLocation,
 		})
 		if err != nil {
-			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "failed insert",
+			})
+		} else {
+			var data []Game
+			err = games.Find(bson.M{"timestamp": timestamp}).All(&data)
+			c.JSON(http.StatusOK, gin.H{
+				"games": data,
+			})
+
 		}
-		var data []Game
-		games.Find(bson.M{"timestamp": timestamp}).All(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"games": data,
-		})
 	}
 
 
@@ -269,9 +295,13 @@ func deleteUser(c *gin.Context) {
 	users := session.DB(db).C("user")
 	err = users.Remove(bson.M{"timestamp": timestamp})
 	if err != nil {
-		log.Println(err)
+		c.JSON(http.StatusOK, gin.H{
+			"error": "failed remove",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{})
+
 	}
-	c.JSON(http.StatusOK, gin.H{})
 }
 
 func deleteGame(c *gin.Context) {
@@ -286,9 +316,13 @@ func deleteGame(c *gin.Context) {
 	games := session.DB(db).C("game")
 	err = games.Remove(bson.M{"timestamp": timestamp})
 	if err != nil {
-		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "failed remove",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{})
+
 	}
-	c.JSON(http.StatusOK, gin.H{})
 }
 
 func deleteAll(c *gin.Context)  {
