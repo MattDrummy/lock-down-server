@@ -26,13 +26,14 @@ type User struct {
 type Game struct {
 	ID                bson.ObjectId `json:"id" bson:"_id,omitempty"`
 	Owner             string        `json:"owner"`
-	OwnerRole         string        `json:"ownerRole"`
-	PublicRoom bool `json:"publicRoom"`
+	Ownerrole         string        `json:"ownerrole"`
+	Publicroom        bool          `json:"publicroom"`
+	Operatorpassword  string        `json:"operatorpassword"`
+	Operatorport      string        `json:"operatorport"`
+	Operativeport     string        `json:"operativeport"`
+	Operativelocation string        `json:"operativelocation"`
 	Timestamp         int32         `json:"timestamp"`
-	OperatorPassword  string        `json:"operatorPassword"`
-	OperatorPort      string        `json:"operatorPort"`
-	OperativePort     string        `json:"operativePort"`
-	OperativeLocation string        `json:"operativeLocation"`
+
 }
 
 // EMAIL
@@ -245,13 +246,13 @@ func postUser(c *gin.Context) {
 
 func postGame(c *gin.Context) {
 	owner := c.PostForm("owner")
-	ownerRole := c.PostForm("ownerRole")
-	publicRoom, _ := strconv.ParseBool(c.PostForm("publicRoom"))
+	ownerrole := c.PostForm("ownerrole")
+	publicroom, _ := strconv.ParseBool(c.PostForm("publicroom"))
 	timestamp := int32(time.Now().Unix())
-	operatorPassword := c.PostForm("operatorPassword")
-	operatorPort := c.PostForm("operatorPort")
-	operativePort := c.PostForm("operativePort")
-	operativeLocation := c.PostForm("operativeLocation")
+	operatorpassword := c.PostForm("operatorpassword")
+	operatorport := c.PostForm("operatorport")
+	operativeport := c.PostForm("operativeport")
+	operativelocation := c.PostForm("operativelocation")
 
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
@@ -270,13 +271,14 @@ func postGame(c *gin.Context) {
 	} else {
 		err = games.Insert(&Game{
 			Owner:             owner,
-			OwnerRole:         ownerRole,
-			PublicRoom: publicRoom,
+			Ownerrole:         ownerrole,
+			Publicroom:        publicroom,
+			Operatorpassword:  operatorpassword,
+			Operatorport:      operatorport,
+			Operativeport:     operativeport,
+			Operativelocation: operativelocation,
 			Timestamp:         timestamp,
-			OperatorPassword:  operatorPassword,
-			OperatorPort:      operatorPort,
-			OperativePort:     operativePort,
-			OperativeLocation: operativeLocation,
+
 		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -385,14 +387,26 @@ func updateUser(c *gin.Context)  {
 	})
 }
 
-func updateGame()  {
+func updateGame(c *gin.Context)  {
 	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
-	publicRoom, _ := strconv.ParseBool(c.PostForm("publicRoom"))
+	owner := c.PostForm("owner")
+	ownerrole := c.PostForm("ownerrole")
+	publicroom, _ := strconv.ParseBool(c.PostForm("publicroom"))
+	operatorpassword := c.PostForm("operatorpassword")
+	operatorport := c.PostForm("operatorport")
+	operativeport := c.PostForm("operativeport")
+	operativelocation := c.PostForm("operativelocation")
 	update := bson.M{
-		"publicRoom": publicRoom,
+		"owner": owner,
+		"ownerrole": ownerrole,
+		"publicroom": publicroom,
+		"operatorpassword": operatorpassword,
+		"operatorport": operatorport,
+		"operativeport": operativeport,
+		"operativelocation": operativelocation,
 	}
 	change := bson.M{
-		"$set": update
+		"$set": update,
 	}
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")

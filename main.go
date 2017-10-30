@@ -62,6 +62,7 @@ func main() {
 	router.GET("api/v1/games", getGames)
 	router.POST("api/v1/games", postGame)
 	router.DELETE("api/v1/games/:timestamp", deleteGame)
+	router.PUT("api/v1/games/:timestamp", updateGame)
 
 	// LOG AND RUN
 
