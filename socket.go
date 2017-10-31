@@ -31,13 +31,13 @@ func socketConnectionHandler(s socketio.Socket) {
 	s.On("disconnection", func() {
 		log.Println("a user has disconnected")
 	})
-	s.On("deleteGame", func(){
+	s.On("gameDeleted", func(){
 		log.Println("a user has deleted a game")
-		s.BroadcastTo("lobby", "deleteGame", "")
+		s.BroadcastTo("lobby", "gameDeleted", "")
 	})
-	s.On("gameAdded", func(){
+	s.On("upateGameList", func(){
 		log.Println("a user has added a game")
-		s.BroadcastTo("lobby", "gameAdded", "")
+		s.BroadcastTo("lobby", "updateGameList", "")
 	})
 	s.On("gameConsole", func(msg [4]string){
 		user := msg[0]
