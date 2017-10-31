@@ -315,7 +315,7 @@ func deleteUser(c *gin.Context) {
 			"error": "failed remove",
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{})
+		c.JSON(http.StatusNoContent, nil)
 
 	}
 }
@@ -336,7 +336,7 @@ func deleteGame(c *gin.Context) {
 			"error": "failed remove",
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{})
+		c.JSON(http.StatusNoContent, nil)
 
 	}
 }

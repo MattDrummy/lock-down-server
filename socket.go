@@ -39,6 +39,14 @@ func socketConnectionHandler(s socketio.Socket) {
 		log.Println("a user has added a game")
 		s.BroadcastTo("lobby", "gameAdded", "")
 	})
+	s.On("gameConsole", func(msg [4]string){
+		user := msg[0]
+		message := msg[1]
+		room := msg[2]
+		role := msg[3]
+		log.Println(user + " : " + role + " : " + room + " : " message)
+		s.BroadcastTo(room, "gameConsole", user + "~" + role + "~" + message)
+	})
 }
 
 func socketErorrHandler(s socketio.Socket, err error) {
