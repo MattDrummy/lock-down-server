@@ -43,7 +43,7 @@ func main() {
 
 	router.POST("/signJWT", signJWT)
 	router.POST("/verifyToken", verifyToken)
-	router.POST("/login", logIn)
+	router.POST("/logIn", logIn)
 
 	// SOCKETS
 
