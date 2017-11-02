@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"github.com/SlyMarbo/gmail"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -57,6 +58,18 @@ func emailHandler(c *gin.Context) {
 
 // AUTH
 
+func hashPassword(password string) (string, error) {
+	salt, _ := strconv.Atoi(os.Getenv("SALT_ROUNDS"))
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), salt)
+	return string(bytes), err
+
+}
+
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 func createToken(claims *jwt.MapClaims) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secretKey := os.Getenv("HMAC_SECRET_KEY")
@@ -70,10 +83,11 @@ func createToken(claims *jwt.MapClaims) string {
 }
 
 func signJWT(c *gin.Context) {
+	password, _ := hashPassword(c.PostForm("password"))
 	claims := &jwt.MapClaims{
 		"username": c.PostForm("username"),
 		"email":    c.PostForm("email"),
-		"password": c.PostForm("password"),
+		"password": password,
 		"timestamp": c.PostForm("timestamp"),
 	}
 	tokenString := createToken(claims)
@@ -82,7 +96,7 @@ func signJWT(c *gin.Context) {
 	})
 }
 
-func logIn(c *gin.Context) {
+func verifyToken(c *gin.Context) {
 	tokenString := c.PostForm("tokenString")
 	secretKey := os.Getenv("HMAC_SECRET_KEY")
 	hmacSampleSecret := []byte(secretKey)
@@ -106,6 +120,38 @@ func logIn(c *gin.Context) {
 	}
 }
 
+func logIn(c *gin.Context)  {
+	password := c.PostForm("password")
+	timestamp, _ := strconv.Atoi(c.PostForm("timestamp"))
+	mongo := os.Getenv("MONGODB_URI")
+	db := os.Getenv("DATABASE_NAME")
+	session, err := mgo.Dial(mongo)
+	if err != nil {
+		log.Println(err)
+	}
+	users := session.DB(db).C("user")
+
+	var data User
+	users.Find(bson.M{"timestamp": timestamp}).One(&data)
+	if data.Timestamp != 0 && checkPasswordHash(password, data.Password) {
+		claims := &jwt.MapClaims{
+			"username": data.Username,
+			"email":    data.Email,
+			"password": data.Password,
+			"timestamp": data.Timestamp,
+		}
+		tokenString := createToken(claims)
+
+		c.JSON(http.StatusOK, gin.H{
+			"token": tokenString,
+		})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "password incorrect",
+		})
+	}
+
+}
 // GET ROUTES
 
 func getUsers(c *gin.Context) {
@@ -207,7 +253,7 @@ func getGames(c *gin.Context) {
 func postUser(c *gin.Context) {
 	username := c.PostForm("username")
 	email := c.PostForm("email")
-	password := c.PostForm("password")
+	password, _ := hashPassword(c.PostForm("password"))
 	timestamp := int32(time.Now().Unix())
 
 	mongo := os.Getenv("MONGODB_URI")
@@ -363,7 +409,7 @@ func updateUser(c *gin.Context)  {
 	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 	username := c.PostForm("username")
 	email := c.PostForm("email")
-	password := c.PostForm("password")
+	password, _ := hashPassword(c.PostForm("password"))
 	update := bson.M{
 		"username": username,
 		"email": email,

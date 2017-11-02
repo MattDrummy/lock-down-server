@@ -42,7 +42,8 @@ func main() {
 	// AUTH
 
 	router.POST("/signJWT", signJWT)
-	router.POST("/logIn", logIn)
+	router.POST("/verifyToken", verifyToken)
+	router.POST("/login", logIn)
 
 	// SOCKETS
 
