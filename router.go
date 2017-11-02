@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/SlyMarbo/gmail"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -34,7 +34,6 @@ type Game struct {
 	Operativeport     string        `json:"operativeport"`
 	Operativelocation string        `json:"operativelocation"`
 	Timestamp         int32         `json:"timestamp"`
-
 }
 
 // EMAIL
@@ -85,9 +84,9 @@ func createToken(claims *jwt.MapClaims) string {
 func signJWT(c *gin.Context) {
 	password, _ := hashPassword(c.PostForm("password"))
 	claims := &jwt.MapClaims{
-		"username": c.PostForm("username"),
-		"email":    c.PostForm("email"),
-		"password": password,
+		"username":  c.PostForm("username"),
+		"email":     c.PostForm("email"),
+		"password":  password,
 		"timestamp": c.PostForm("timestamp"),
 	}
 	tokenString := createToken(claims)
@@ -111,7 +110,7 @@ func verifyToken(c *gin.Context) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		c.JSON(http.StatusOK, gin.H{
 			"claims": claims,
-			"valid": token.Valid,
+			"valid":  token.Valid,
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
@@ -120,7 +119,7 @@ func verifyToken(c *gin.Context) {
 	}
 }
 
-func logIn(c *gin.Context)  {
+func logIn(c *gin.Context) {
 	password := c.PostForm("password")
 	timestamp, _ := strconv.Atoi(c.PostForm("timestamp"))
 	mongo := os.Getenv("MONGODB_URI")
@@ -135,9 +134,9 @@ func logIn(c *gin.Context)  {
 	users.Find(bson.M{"timestamp": timestamp}).One(&data)
 	if data.Timestamp != 0 && checkPasswordHash(password, data.Password) {
 		claims := &jwt.MapClaims{
-			"username": data.Username,
-			"email":    data.Email,
-			"password": data.Password,
+			"username":  data.Username,
+			"email":     data.Email,
+			"password":  data.Password,
 			"timestamp": data.Timestamp,
 		}
 		tokenString := createToken(claims)
@@ -152,6 +151,7 @@ func logIn(c *gin.Context)  {
 	}
 
 }
+
 // GET ROUTES
 
 func getUsers(c *gin.Context) {
@@ -247,7 +247,6 @@ func getGames(c *gin.Context) {
 	}
 }
 
-
 // POST ROUTES
 
 func postUser(c *gin.Context) {
@@ -324,7 +323,6 @@ func postGame(c *gin.Context) {
 			Operativeport:     operativeport,
 			Operativelocation: operativelocation,
 			Timestamp:         timestamp,
-
 		})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -339,7 +337,6 @@ func postGame(c *gin.Context) {
 
 		}
 	}
-
 
 }
 
@@ -387,7 +384,7 @@ func deleteGame(c *gin.Context) {
 	}
 }
 
-func deleteAll(c *gin.Context)  {
+func deleteAll(c *gin.Context) {
 	mongo := os.Getenv("MONGODB_URI")
 	db := os.Getenv("DATABASE_NAME")
 	session, err := mgo.Dial(mongo)
@@ -405,14 +402,14 @@ func deleteAll(c *gin.Context)  {
 
 // PUT ROUTES
 
-func updateUser(c *gin.Context)  {
+func updateUser(c *gin.Context) {
 	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 	username := c.PostForm("username")
 	email := c.PostForm("email")
 	password, _ := hashPassword(c.PostForm("password"))
 	update := bson.M{
 		"username": username,
-		"email": email,
+		"email":    email,
 		"password": password,
 	}
 	change := bson.M{
@@ -433,7 +430,7 @@ func updateUser(c *gin.Context)  {
 	})
 }
 
-func updateGame(c *gin.Context)  {
+func updateGame(c *gin.Context) {
 	timestamp, _ := strconv.Atoi(c.Param("timestamp"))
 	owner := c.PostForm("owner")
 	ownerrole := c.PostForm("ownerrole")
@@ -443,12 +440,12 @@ func updateGame(c *gin.Context)  {
 	operativeport := c.PostForm("operativeport")
 	operativelocation := c.PostForm("operativelocation")
 	update := bson.M{
-		"owner": owner,
-		"ownerrole": ownerrole,
-		"publicroom": publicroom,
-		"operatorpassword": operatorpassword,
-		"operatorport": operatorport,
-		"operativeport": operativeport,
+		"owner":             owner,
+		"ownerrole":         ownerrole,
+		"publicroom":        publicroom,
+		"operatorpassword":  operatorpassword,
+		"operatorport":      operatorport,
+		"operativeport":     operativeport,
 		"operativelocation": operativelocation,
 	}
 	change := bson.M{
